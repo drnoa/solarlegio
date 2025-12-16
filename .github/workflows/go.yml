@@ -8,23 +8,23 @@ on:
 
 jobs:
   build:
-    name: Build for ${{ matrix.goarch }}
+    name: Build & Test (${{ matrix.goarch }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          # Für normale Linux Server / PCs
           - goarch: amd64
             goos: linux
             output_name: solarlegio-linux-amd64
-          # Für Raspberry Pi 3, 4, 5 (mit 64-bit OS - Empfohlen)
+            run_tests: true
           - goarch: arm64
             goos: linux
             output_name: solarlegio-linux-arm64
-          # Für ältere Raspberry Pis oder 32-bit OS
+            run_tests: false
           - goarch: arm
             goos: linux
             output_name: solarlegio-linux-armv7
+            run_tests: false
 
     steps:
     - uses: actions/checkout@v4
@@ -33,17 +33,17 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.23.x'
+        cache: false # Disable caching because we only use standard library (no go.sum)
 
-    - name: Build
+    - name: Run Unit Tests
+      if: matrix.run_tests == true
+      run: go test -v ./...
+
+    - name: Build Binary
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
       run: go build -o ${{ matrix.output_name }} main.go
-
-    - name: Test
-      # Tests laufen nur auf der Architektur des Runners (amd64)
-      if: matrix.goarch == 'amd64'
-      run: go test -v ./...
 
     - name: Upload Binary
       uses: actions/upload-artifact@v4
