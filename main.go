@@ -59,13 +59,16 @@ type StreamData struct {
 	} `json:"data"`
 }
 
+// API Modes according to Solar Manager Swagger
 const (
-	StateFile  = "legio_state.json"
-	ConfigFile = "config.json"
-
-	// API Modes according to Solar Manager Swagger
 	ModeOn        = 1 // Always On
 	ModeSolarOnly = 3 // Solar Optimized
+)
+
+// Configurable file paths
+var (
+	StateFile  = "legio_state.json"
+	ConfigFile = "config.json"
 )
 
 var (
